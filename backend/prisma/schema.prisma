@@ -1,0 +1,273 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  HR
+}
+
+enum GoalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ReviewStatus {
+  PENDING
+  COMPLETED
+}
+
+enum ReviewCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum NotificationType {
+  GOAL
+  REVIEW
+  TIMELINE
+  SYSTEM
+  LEAVE
+}
+
+enum FeedbackAction {
+  APPROVED
+  REJECTED
+  FEEDBACK
+}
+
+enum LeaveRequestType {
+  LEAVE
+  WFH
+}
+
+enum LeaveType {
+  SICK_LEAVE
+  CASUAL_LEAVE
+  ANNUAL_LEAVE
+  MATERNITY_LEAVE
+  PATERNITY_LEAVE
+  UNPAID_LEAVE
+}
+
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         Role
+
+  department   String?
+  designation  String?
+
+  // Reporting Manager
+  managerId String?
+  manager   User?  @relation("ReportingManager", fields: [managerId], references: [id])
+  team       User[] @relation("ReportingManager")
+
+  // Soft Delete Fields
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+  deletedBy    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Goal owner
+  goals Goal[] @relation("GoalOwner")
+
+  // Goal creator (Employee/Manager)
+  createdGoals Goal[] @relation("GoalCreator")
+
+  // Goal approver (Manager)
+  approvedGoals Goal[] @relation("GoalApprover")
+
+  feedbacks GoalFeedback[]
+
+  reviews Review[]
+
+  timelines Timeline[]
+
+  notifications Notification[]
+
+  // Leave requests submitted by this user
+  leaveRequests LeaveRequest[] @relation("LeaveRequestEmployee")
+
+  // Leave requests managed by this user (as manager)
+  managedLeaveRequests LeaveRequest[] @relation("LeaveRequestManager")
+
+  // Goal discussions
+  goalDiscussions GoalDiscussion[]
+}
+
+model Goal {
+  id String @id @default(cuid())
+
+  title String
+  description String
+
+  status GoalStatus @default(PENDING)
+
+  progress Int @default(0)
+
+  startDate DateTime
+  endDate DateTime
+
+  ownerId String
+  owner User @relation("GoalOwner", fields: [ownerId], references: [id])
+
+  createdById String
+  createdBy User @relation("GoalCreator", fields: [createdById], references: [id])
+
+  approvedById String?
+  approvedBy User? @relation("GoalApprover", fields: [approvedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  feedbacks GoalFeedback[]
+  discussions GoalDiscussion[]
+}
+
+model GoalFeedback {
+
+  id String @id @default(cuid())
+
+  action FeedbackAction
+
+  comment String
+
+  goalId String
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  managerId String
+  manager User @relation(fields: [managerId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Review {
+
+  id String @id @default(cuid())
+
+  rating Int?
+
+  feedback String?
+
+  status ReviewStatus @default(PENDING)
+
+  // Review Cycle Fields
+  reviewCycle ReviewCycle @default(MONTHLY)
+  reviewMonth Int? // 1-12 (only for MONTHLY)
+  reviewYear Int @default(2026)
+
+  // AI-Generated Review Fields
+  aiRating Int?
+  aiPerformanceSummary String?
+  aiStrengths String? // JSON array stored as string
+  aiAreasForImprovement String? // JSON array stored as string
+  aiRecommendations String? // JSON array stored as string
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Timeline {
+
+  id String @id @default(cuid())
+
+  title String
+
+  description String
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+
+  id String @id @default(cuid())
+
+  title String
+
+  message String
+
+  type NotificationType
+
+  isRead Boolean @default(false)
+
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model LeaveRequest {
+
+  id String @id @default(cuid())
+
+  requestType LeaveRequestType
+
+  leaveType LeaveType?
+
+  startDate DateTime
+
+  endDate DateTime
+
+  reason String
+
+  status LeaveRequestStatus @default(PENDING)
+
+  managerComment String?
+
+  // Employee who submitted the request
+  employeeId String
+  employee User @relation("LeaveRequestEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
+
+  // Manager who will approve/reject
+  managerId String
+  manager User @relation("LeaveRequestManager", fields: [managerId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model GoalDiscussion {
+
+  id String @id @default(cuid())
+
+  message String
+
+  goalId String
+  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}

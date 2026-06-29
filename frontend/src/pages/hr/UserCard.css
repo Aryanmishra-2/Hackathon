@@ -1,0 +1,192 @@
+.user-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  transition: .3s;
+}
+
+.user-card:hover {
+  transform: translateY(-4px);
+}
+
+.user-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-avatar {
+  width: 70px;
+  height: 70px;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 38px;
+}
+
+.user-left h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 22px;
+}
+
+.user-left p {
+  margin: 8px 0;
+  color: #6b7280;
+}
+
+.role-badge {
+  display: inline-block;
+
+  padding: 6px 14px;
+
+  color: white;
+
+  border-radius: 50px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+}
+
+.user-right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.status span {
+  padding: 8px 14px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.inactive {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn,
+.delete-btn {
+
+  width: 42px;
+  height: 42px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 16px;
+
+  transition: .3s;
+
+}
+
+.edit-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #1d4ed8;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}
+
+@media (max-width:900px){
+
+.user-card{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+gap:20px;
+
+}
+
+.user-right{
+
+width:100%;
+
+justify-content:space-between;
+
+}
+
+}
+
+@media (max-width:600px){
+
+.user-left{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+}
+
+.user-right{
+
+flex-direction:column;
+
+align-items:flex-start;
+
+gap:15px;
+
+}
+
+.actions{
+
+width:100%;
+
+}
+
+.edit-btn,
+.delete-btn{
+
+flex:1;
+
+width:100%;
+
+}
+
+}

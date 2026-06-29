@@ -1,0 +1,72 @@
+.goal-progress {
+  margin-top: 30px;
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+}
+
+.goal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.goal-header h2 {
+  margin: 0;
+  color: #111827;
+}
+
+.goal-header span {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.goal-item {
+  margin-bottom: 22px;
+}
+
+.goal-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.goal-title {
+  font-weight: 600;
+  color: #111827;
+}
+
+.goal-status {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 50px;
+  transition: .4s;
+}
+
+.progress-text {
+  width: 50px;
+  text-align: right;
+  font-weight: 600;
+  color: #2563eb;
+}
