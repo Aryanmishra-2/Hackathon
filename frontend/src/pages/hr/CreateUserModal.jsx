@@ -29,11 +29,15 @@ export default function CreateUserModal({
 
     managerId: "",
 
+    inviteToJira: false, // Jira invitation checkbox
+
   });
 
   const [managers, setManagers] = useState([]);
 
   const [loading, setLoading] = useState(false);
+
+  const [showJiraOption, setShowJiraOption] = useState(false); // Show Jira checkbox
 
   const isEditMode = Boolean(editUser);
 
@@ -53,7 +57,12 @@ export default function CreateUserModal({
         department: editUser.department || "",
         designation: editUser.designation || "",
         managerId: editUser.managerId || "",
+        inviteToJira: false, // Reset Jira invitation
       });
+
+      // Show Jira option only if user doesn't have Jira account yet
+      // If jiraAccountId exists, user is already connected to Jira
+      setShowJiraOption(!editUser.jiraAccountId);
     } else {
       // Reset form for create mode
       setForm({
@@ -64,7 +73,9 @@ export default function CreateUserModal({
         department: "",
         designation: "",
         managerId: "",
+        inviteToJira: false,
       });
+      setShowJiraOption(true);
     }
 
   }, [open, editUser]);
@@ -116,10 +127,16 @@ export default function CreateUserModal({
           department: form.department,
           designation: form.designation,
           managerId: form.managerId || null,
+          inviteToJira: form.inviteToJira, // Include Jira invitation for edit
         };
 
         await updateUser(editUser.id, updatePayload);
-        alert("User Updated Successfully");
+        
+        if (form.inviteToJira) {
+          alert("User Updated Successfully! Jira invitation sent if user doesn't have Jira account.");
+        } else {
+          alert("User Updated Successfully");
+        }
       } else {
         // Create new user
         await createUser(form);
@@ -145,6 +162,8 @@ export default function CreateUserModal({
         designation: "",
 
         managerId: "",
+
+        inviteToJira: false,
 
       });
 
@@ -358,6 +377,80 @@ export default function CreateUserModal({
           )}
 
           <br /><br />
+
+          {/* Show Jira Status for existing users */}
+          {isEditMode && editUser?.jiraAccountId && (
+            <div
+              style={{
+                background: "#f0fdf4",
+                border: "2px solid #16a34a",
+                borderRadius: "10px",
+                padding: "16px",
+                marginBottom: "20px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ fontSize: "20px" }}>✓</span>
+                <div>
+                  <div style={{ color: "#15803d", fontWeight: "600", fontSize: "15px" }}>
+                    Jira Account Connected
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>
+                    This user is already connected to Jira workspace. Account ID: {editUser.jiraAccountId.substring(0, 20)}...
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Jira Invitation Checkbox - Show in both create and edit mode */}
+          {showJiraOption && (
+            <div
+              style={{
+                background: "#eff6ff",
+                border: "2px solid #2563eb",
+                borderRadius: "10px",
+                padding: "16px",
+                marginBottom: "20px",
+              }}
+            >
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  cursor: "pointer",
+                  fontSize: "15px",
+                  fontWeight: "500",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  name="inviteToJira"
+                  checked={form.inviteToJira}
+                  onChange={(e) =>
+                    setForm({ ...form, inviteToJira: e.target.checked })
+                  }
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    cursor: "pointer",
+                  }}
+                />
+                <div>
+                  <div style={{ color: "#1e40af", fontWeight: "600" }}>
+                    🔗 {isEditMode ? "Send Jira Workspace Invitation" : "Invite to Company Jira Workspace"}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#64748b", marginTop: "4px" }}>
+                    {isEditMode 
+                      ? "Send Jira workspace invitation to this user. If they already have a Jira account, it will be linked automatically."
+                      : "Send official Jira workspace invitation to employee's email. They'll be able to work on synced tasks in Jira."
+                    }
+                  </div>
+                </div>
+              </label>
+            </div>
+          )}
 
           <div
             style={{

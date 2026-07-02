@@ -46,6 +46,7 @@ module.exports = async (req, res, next) => {
         department: true,
         designation: true,
         managerId: true,
+        isDeleted: true,
       },
     });
 
@@ -53,6 +54,14 @@ module.exports = async (req, res, next) => {
       return res.status(401).json({
         success: false,
         message: "User does not exist.",
+      });
+    }
+
+    // Check if user is deleted/archived
+    if (user.isDeleted) {
+      return res.status(403).json({
+        success: false,
+        message: "Account has been deactivated. Please contact HR.",
       });
     }
 

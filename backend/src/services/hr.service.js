@@ -75,6 +75,8 @@ exports.getUsers = async () => {
       department: true,
       designation: true,
       managerId: true,
+      jiraAccountId: true, // Include Jira account ID
+      jiraInvited: true, // Include Jira invitation status
       createdAt: true,
       updatedAt: true,
     },
@@ -90,6 +92,7 @@ exports.getUsers = async () => {
 exports.createUser = async (data) => {
 
   const bcrypt = require("bcrypt");
+  const jiraService = require("./jira.service");
 
   if (!data.name || !data.email || !data.password || !data.role) {
     throw new Error("Name, Email, Password and Role are required.");
@@ -113,7 +116,8 @@ exports.createUser = async (data) => {
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  return prisma.user.create({
+  // Create user in PMS
+  const user = await prisma.user.create({
     data: {
       name: data.name.trim(),
       email: normalizedEmail,
@@ -132,8 +136,48 @@ exports.createUser = async (data) => {
       designation: true,
       managerId: true,
       createdAt: true,
+      jiraAccountId: true,
+      jiraInvited: true,
     },
   });
+
+  // Optional Jira invitation
+  if (data.inviteToJira === true) {
+    console.log(`[HR Service] Jira invitation requested for user: ${user.email}`);
+    try {
+      const jiraResult = await jiraService.inviteUserToWorkspace(
+        user.email,
+        user.name
+      );
+
+      console.log(`[HR Service] Jira invitation result:`, jiraResult);
+
+      if (jiraResult.success && jiraResult.accountId) {
+        // Update user with Jira account ID
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            jiraAccountId: jiraResult.accountId,
+            jiraInvited: true,
+          },
+        });
+
+        user.jiraAccountId = jiraResult.accountId;
+        user.jiraInvited = true;
+
+        console.log(`[HR Service] ✓ User ${user.email} linked to Jira account: ${jiraResult.accountId}`);
+      } else {
+        console.warn(`[HR Service] ✗ Jira invitation failed for ${user.email}:`, jiraResult.message);
+      }
+    } catch (jiraError) {
+      // Log error but don't fail user creation
+      console.error("[HR Service] Jira invitation error:", jiraError.message);
+    }
+  } else {
+    console.log(`[HR Service] Jira invitation not requested for user: ${user.email}`);
+  }
+
+  return user;
 
 };
 
@@ -199,8 +243,21 @@ exports.getUserById = async (id) => {
 
 exports.updateUser = async (id, data) => {
 
+  const jiraService = require("./jira.service");
+
   const existingUser = await prisma.user.findUnique({
     where: { id },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      department: true,
+      designation: true,
+      managerId: true,
+      jiraAccountId: true,
+      jiraInvited: true,
+    },
   });
 
   if (!existingUser) {
@@ -244,8 +301,46 @@ exports.updateUser = async (id, data) => {
       designation: true,
       managerId: true,
       updatedAt: true,
+      jiraAccountId: true,
+      jiraInvited: true,
     },
   });
+
+  // Handle Jira invitation for existing user
+  if (data.inviteToJira === true && !existingUser.jiraAccountId) {
+    console.log(`[HR Service] Jira invitation requested for existing user: ${updatedUser.email}`);
+    try {
+      const jiraResult = await jiraService.inviteUserToWorkspace(
+        updatedUser.email,
+        updatedUser.name
+      );
+
+      console.log(`[HR Service] Jira invitation result:`, jiraResult);
+
+      if (jiraResult.success && jiraResult.accountId) {
+        // Update user with Jira account ID
+        await prisma.user.update({
+          where: { id: updatedUser.id },
+          data: {
+            jiraAccountId: jiraResult.accountId,
+            jiraInvited: true,
+          },
+        });
+
+        updatedUser.jiraAccountId = jiraResult.accountId;
+        updatedUser.jiraInvited = true;
+
+        console.log(`[HR Service] ✓ Existing user ${updatedUser.email} linked to Jira account: ${jiraResult.accountId}`);
+      } else {
+        console.warn(`[HR Service] ✗ Jira invitation failed for ${updatedUser.email}:`, jiraResult.message);
+      }
+    } catch (jiraError) {
+      // Log error but don't fail user update
+      console.error("[HR Service] Jira invitation error:", jiraError.message);
+    }
+  } else if (data.inviteToJira === true && existingUser.jiraAccountId) {
+    console.log(`[HR Service] User ${updatedUser.email} already has Jira account ID: ${existingUser.jiraAccountId}`);
+  }
 
   return updatedUser;
 

@@ -148,7 +148,7 @@ exports.updateLeaveRequestStatus = async (requestId, managerId, data) => {
   });
 
   // Send notification to employee
-  await notificationService.create({
+  await notificationService.createNotification({
     userId: leaveRequest.employeeId,
     title: `${leaveRequest.requestType === "LEAVE" ? "Leave" : "WFH"} Request ${status === "APPROVED" ? "Approved" : "Rejected"}`,
     message: `Your ${leaveRequest.requestType === "LEAVE" ? "Leave" : "Work From Home"} request has been ${status.toLowerCase()} by ${leaveRequest.manager.name}.${managerComment ? ` Comment: ${managerComment}` : ""}`,
@@ -156,7 +156,7 @@ exports.updateLeaveRequestStatus = async (requestId, managerId, data) => {
   });
 
   // Create timeline entry for employee
-  await timelineService.create({
+  await timelineService.createTimeline({
     userId: leaveRequest.employeeId,
     title: `${leaveRequest.requestType === "LEAVE" ? "Leave" : "WFH"} Request ${status === "APPROVED" ? "Approved" : "Rejected"}`,
     description: `${leaveRequest.requestType === "LEAVE" ? "Leave" : "Work From Home"} request ${status.toLowerCase()} by ${leaveRequest.manager.name}${managerComment ? ` - ${managerComment}` : ""}`,

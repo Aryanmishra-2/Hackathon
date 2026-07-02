@@ -527,6 +527,8 @@ class GoalService {
 
   async updateProgress(goalId, progress) {
 
+    const jiraService = require("./jira.service");
+
     return prisma.$transaction(async (tx) => {
 
       const goal = await tx.goal.findUnique({
@@ -570,6 +572,17 @@ class GoalService {
         },
       });
 
+      // Sync progress to Jira after transaction commits
+      if (goal.jiraIssueKey) {
+        setImmediate(async () => {
+          try {
+            await jiraService.updateTaskProgress(goal.jiraIssueKey, progress);
+          } catch (error) {
+            console.error("Failed to sync progress to Jira:", error.message);
+          }
+        });
+      }
+
       return updatedGoal;
 
     });
@@ -582,6 +595,8 @@ class GoalService {
 
   async approveGoal(goalId, managerId, comment) {
 
+    const jiraService = require("./jira.service");
+
     return prisma.$transaction(async (tx) => {
 
       const goal = await tx.goal.findUnique({
@@ -592,6 +607,7 @@ class GoalService {
           owner: {
             select: {
               managerId: true,
+              jiraAccountId: true,
             },
           },
         },
@@ -671,6 +687,23 @@ class GoalService {
 
         },
 
+      });
+
+      // Auto-create Jira task after transaction commits
+      setImmediate(async () => {
+        try {
+          // Only create Jira task if not already created
+          if (!updatedGoal.jiraIssueKey && goal.owner.jiraAccountId) {
+            await jiraService.createTask({
+              title: updatedGoal.title,
+              description: updatedGoal.description,
+              ownerId: updatedGoal.ownerId,
+              goalId: updatedGoal.id,
+            });
+          }
+        } catch (error) {
+          console.error("Failed to create Jira task:", error.message);
+        }
       });
 
       return updatedGoal;

@@ -64,7 +64,7 @@ export const approveGoal = async (
   comment = ""
 ) => {
 
-  const response = await api.put(
+  const response = await api.patch(
     `/manager/goals/${id}/approve`,
     {
       comment,
@@ -84,7 +84,7 @@ export const rejectGoal = async (
   comment = ""
 ) => {
 
-  const response = await api.put(
+  const response = await api.patch(
     `/manager/goals/${id}/reject`,
     {
       comment,

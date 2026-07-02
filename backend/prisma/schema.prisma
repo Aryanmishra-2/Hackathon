@@ -84,6 +84,10 @@ model User {
   deletedAt    DateTime?
   deletedBy    String?
 
+  // Jira Integration Fields
+  jiraAccountId String?
+  jiraInvited   Boolean   @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -135,6 +139,12 @@ model Goal {
 
   approvedById String?
   approvedBy User? @relation("GoalApprover", fields: [approvedById], references: [id])
+
+  // Jira Integration Fields
+  jiraIssueKey    String?
+  jiraIssueUrl    String?
+  jiraStatus      String?
+  jiraSyncStatus  String?  @default("NOT_SYNCED") // NOT_SYNCED, SYNCING, SYNCED, FAILED
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

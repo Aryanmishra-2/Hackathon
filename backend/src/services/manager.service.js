@@ -12,6 +12,7 @@ class ManagerService {
       where: {
         managerId,
         role: "EMPLOYEE",
+        isDeleted: false, // Only active employees
       },
     });
 
@@ -81,6 +82,7 @@ class ManagerService {
 
       where: {
         managerId,
+        isDeleted: false, // Only active team members
       },
 
       select: {

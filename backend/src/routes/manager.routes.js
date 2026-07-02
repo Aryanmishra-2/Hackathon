@@ -76,12 +76,12 @@ router.get(
 // Approval
 // ==========================================
 
-router.put(
+router.patch(
   "/goals/:id/approve",
   managerController.approveGoal
 );
 
-router.put(
+router.patch(
   "/goals/:id/reject",
   managerController.rejectGoal
 );

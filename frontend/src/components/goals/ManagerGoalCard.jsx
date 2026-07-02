@@ -206,6 +206,46 @@ export default function ManagerGoalCard({
 
           <div style={{ display: "flex", gap: "8px", marginLeft: "20px", flexDirection: "column" }}>
 
+            {/* Jira Integration Info */}
+            {goal.jiraIssueKey && (
+              <div
+                style={{
+                  padding: "12px",
+                  background: "#f0f9ff",
+                  border: "1px solid #bae6fd",
+                  borderRadius: "8px",
+                  marginBottom: "10px",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: "13px", fontWeight: "600", color: "#0369a1", marginBottom: "6px" }}>
+                  🔗 {goal.jiraIssueKey}
+                </div>
+                {goal.jiraStatus && (
+                  <div style={{ fontSize: "11px", color: "#64748b", marginBottom: "8px" }}>
+                    {goal.jiraStatus}
+                  </div>
+                )}
+                <a
+                  href={goal.jiraIssueUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: "#0284c7",
+                    color: "white",
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    display: "inline-block",
+                  }}
+                >
+                  Open in Jira →
+                </a>
+              </div>
+            )}
+
             <button
               onClick={() => setExpanded(!expanded)}
               style={{

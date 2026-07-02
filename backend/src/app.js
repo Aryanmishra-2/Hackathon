@@ -17,6 +17,7 @@ const reportRoutes = require("./routes/report.routes");
 const aiRoutes = require("./routes/ai.routes");
 const leaveRoutes = require("./routes/leave.routes");
 const discussionRoutes = require("./routes/discussion.routes");
+const jiraRoutes = require("./routes/jira.routes");
 
 const app = express();
 
@@ -76,6 +77,8 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/leave", leaveRoutes);
 
 app.use("/api/discussions", discussionRoutes);
+
+app.use("/api/jira", jiraRoutes);
 
 // ================= 404 =================
 // Express 5 Compatible
